@@ -55,19 +55,47 @@ class _NumberBoxState extends ConsumerState<NumberBox> {
   @override
   Widget build(BuildContext context) {
     myController.text=ref.watch(widget.provider).state.toString().padLeft(2,"0");
+    myController.selection=TextSelection.fromPosition(TextPosition(offset: myController.text.length));
     return Row(
       children:[
         SizedBox(
             height: 60,
-            width: myController.text.length<3?40:60,
+            width: myController.text.length*20.0,
             child: TextFormField(
+              autovalidateMode: AutovalidateMode.always,
               style: TextStyle(fontSize: 30),
               controller: myController,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              onChanged: (text){
-                text=="" || int.parse(text)<0?
-                ref.read(widget.provider).state=0:
+              validator: (String? value){
+                if (value==null||value.isEmpty){
+                  return null;
+                }else if (int.parse(value)<widget.minValue) {
+                  return "${widget.minValue}以上の数値を入力してください。";
+                }else {
+                  if(int.parse(value)>widget.maxValue){
+                  return  "${widget.maxValue}未満の数値を入力してください。";
+                  }
+                }
+              },
+              onFieldSubmitted: (text){
+                if (text.isEmpty){
+                  if (ref.read(widget.provider).state==widget.minValue){
+                    ref.read(widget.provider).state=widget.minValue-1;
+                    ref.read(widget.provider).state=widget.minValue;
+                  }else{
+                    ref.read(widget.provider).state=widget.minValue;
+                  }
+                  //print(ref.read(widget.provider).state);
+                }else if (int.parse(text)>widget.maxValue){
+                  ref.read(widget.provider).state=widget.maxValue-1;
+                }else if (int.parse(text)<widget.minValue){
+                  ref.read(widget.provider).state=widget.minValue;
+                }
+              },
+              onChanged: (text){          
+                text=="" || int.parse(text)<widget.minValue?
+                ref.read(widget.provider).state=widget.minValue:
                 ref.read(widget.provider).state=int.parse(text);
               }
             ),

@@ -117,5 +117,7 @@ final longPressTimerProvider=StateProvider((ref){
   return Timer.periodic(Duration(seconds:1),(timer)=>{});
 });
 
-
+final textFaceProvider=StateProvider.family((ref,provider){
+  
+});
 
